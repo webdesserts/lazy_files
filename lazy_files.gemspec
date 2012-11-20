@@ -15,6 +15,7 @@ Gem::Specification.new do |gem|
   gem.version       = Lazy::VERSION
 
   gem.add_development_dependency 'guard'
+  gem.add_development_dependency 'spwn'
   gem.add_development_dependency 'guard-rspec'
   gem.add_development_dependency 'rspec'
   gem.add_development_dependency 'rb-inotify'
