@@ -1,5 +1,5 @@
 require 'spec_helper'
-require 'lazy_files/file'
+require 'lazy_files/files/file'
 
 describe Lazy::File do
   before(:all) { Dir.chdir TESTDIR }
@@ -10,7 +10,7 @@ describe Lazy::File do
   it { should respond_to :basename }
   context "exist?" do
     it "should respond to all path based File methods" do
-      Lazy::File::PATH_METHODS.each do |method_name|
+      Lazy::File::PATHBASED_METHODS.each do |method_name|
         should respond_to method_name
       end
     end
@@ -27,35 +27,40 @@ describe Lazy::File do
 
   context "Lazy method mods" do
     subject(:Lazy) { Lazy }
+  end
+end
 
-    context "::basename" do
-      it { should respond_to :basename }
-      it "should accept a path" do
-        Lazy.basename('hello/testfile.jpeg').should == "testfile.jpeg"
-      end
-      it "should accept a Lazy::File" do
-        Spwn.file('testfile.jpeg')
-        file = Lazy.file('testfile.jpeg')
-        Lazy.basename(file)
-      end
+describe Lazy do
+  before(:all) { Dir.chdir TESTDIR }
+  after(:each) { Spwn.clean TESTDIR }
+  after(:all) { Dir.chdir ROOT}
+  context "::basename" do
+    it { should respond_to :basename }
+    it "should accept a path" do
+      Lazy.basename('hello/testfile.jpeg').should == "testfile.jpeg"
     end
+    it "should accept a Lazy::File" do
+      Spwn.file('testfile.jpeg')
+      file = Lazy.file('testfile.jpeg')
+      Lazy.basename(file)
+    end
+  end
 
-    context "::file" do
-      it { should respond_to :file}
-      it "should create a file if it does not exist" do
-        Lazy.file('testfile.jpeg')
-        File.exist?('testfile.jpeg').should be_true
+  context "::file" do
+    it { should respond_to :file}
+    it "should create a file if it does not exist" do
+      Lazy.file('testfile.jpeg')
+      File.exist?('testfile.jpeg').should be_true
+    end
+    it "should return the file" do
+      Spwn.dir('hello') do
+        Spwn.file('testfile.jpeg')
       end
-      it "should return the file" do
-        Spwn.dir('hello') do
-          Spwn.file('testfile.jpeg')
-        end
-        Lazy.file('hello/testfile.jpeg').should be_an_instance_of Lazy::File
-      end
-      it "should open the file when a block is given" do
-        Spwn.file('testfile.jpeg') do |file|
-          file.closed?.should be_false
-        end
+      Lazy.file('hello/testfile.jpeg').should be_an_instance_of Lazy::File
+    end
+    it "should open the file when a block is given" do
+      Spwn.file('testfile.jpeg') do |file|
+        file.closed?.should be_false
       end
     end
   end
