@@ -22,11 +22,16 @@ class Lazy::File
     end
   end
 
+  def basename
+    File.basename @path
+  end
+
+  def name
+    basename[/.*(?=#{extname}\Z)/]
+  end
+
   def to_s
     "#<LazyFile:#{basename}>"
   end
 
-  def basename
-    File.basename @path
-  end
 end

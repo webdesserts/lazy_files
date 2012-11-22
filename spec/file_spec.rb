@@ -24,6 +24,17 @@ describe Lazy::File do
       file.should_not exist
     end
   end
+  context "#name" do
+    it "should return the files name" do
+      Lazy.file('hello.jpg').name.should == "hello"
+    end
+    it "should work with dotfiles" do
+      Lazy.file('.gitignore').name.should == ".gitignore"
+    end
+    it "should work with multiple extensions" do
+      Lazy.file('main.js.coffee').name.should == "main.js"
+    end
+  end
 end
 
 describe Lazy do
