@@ -8,7 +8,7 @@ describe Lazy::File do
   subject { Lazy.file('test.md') }
 
   it { should respond_to :basename }
-  context "exist?" do
+  context "#exist?" do
     it "should respond to all path based File methods" do
       Lazy::File::PATHBASED_METHODS.each do |method_name|
         should respond_to method_name
@@ -23,10 +23,6 @@ describe Lazy::File do
       File.delete(file.path)
       file.should_not exist
     end
-  end
-
-  context "Lazy method mods" do
-    subject(:Lazy) { Lazy }
   end
 end
 

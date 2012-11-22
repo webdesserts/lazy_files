@@ -1,5 +1,5 @@
 require 'lazy_files/files/file_mods'
-require 'lazy_files/files/pathbased_methods'
+require 'lazy_files/files/constants'
 
 class Lazy::File
   attr_reader :path
@@ -29,5 +29,4 @@ class Lazy::File
   def basename
     File.basename @path
   end
-
 end

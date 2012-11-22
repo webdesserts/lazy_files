@@ -1,7 +1,7 @@
 # This is a list of all methods on the Ruby File class that
 # have a single parameter and accept a path name. This is here
-# to all me to metaprogram the methods into the Lazy::File class
-# rather than add the methods manually
+# to allow me to metaprogram the methods into the Lazy::File
+# class rather than add the methods manually
 
 class Lazy::File
   PATHBASED_METHODS = [
