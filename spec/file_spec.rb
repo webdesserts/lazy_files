@@ -4,45 +4,67 @@ require 'lazy_files/files/file'
 describe Lazy::File do
   before(:all) { Dir.chdir TESTDIR }
   after(:each) { Spwn.clean TESTDIR }
-  after(:all) { Dir.chdir ROOT}
+  after(:all) do
+    Dir.chdir ROOT
+    Spwn.clean TESTDIR
+  end
   subject(:file) { Lazy.file('hello.txt') }
 
   its(:io) { should be_nil }
   its(:path) { should == File.join(TESTDIR, 'hello.txt')}
 
   it { should respond_to :basename }
+  it { should respond_to :exist? }
+  it { should respond_to :exists? }
+  it { should respond_to :open }
+  it 'should respond to all path based File methods' do
+    Lazy::File::PATHBASED_METHODS.each do |method_name|
+      should respond_to method_name
+    end
+  end
+
+  context '#new' do
+    context "with a block passed" do
+      it "should open and immediately close a file" do
+        io = nil
+        Lazy.file('hello.txt') do |f|
+          io = f
+        end
+        io.should be_closed
+      end
+      it "should allow access to the file" do
+        Lazy.file('hello.txt') do |f|
+          f.print "hello world"
+        end
+        `cat hello.txt`.should == "hello world"
+      end
+    end
+  end
 
   context '#basename' do
     it "should return the file's current basename" do
       file.basename.should == 'hello.txt'
     end
-    context 'when the with_ext option is false' do
+    context 'when the :ext option is false' do
       it 'it should return the name without an extension' do
-        file.basename(false).should == 'hello'
+        file.basename(ext: false).should == 'hello'
       end
       it 'should return the files name' do
-        Lazy.file('hello.jpg').basename(false).should == 'hello'
+        Lazy.file('hello.jpg').basename(ext: false).should == 'hello'
       end
       it 'should work with dotfiles' do
-        Lazy.file('.gitignore').basename(false).should == '.gitignore'
+        Lazy.file('.gitignore').basename(ext: false).should == '.gitignore'
       end
       it 'should work with multiple extensions' do
-        Lazy.file('main.js.coffee').basename(false).should == 'main.js'
+        Lazy.file('main.js.coffee').basename(ext: false).should == 'main.js'
       end
-    end
-  end
-
-  context '#name' do
-    it 'should return the basename without an extension' do
-      file.name.should == 'hello'
     end
   end
 
   context '#exist?' do
-    it 'should respond to all path based File methods' do
-      Lazy::File::PATHBASED_METHODS.each do |method_name|
-        should respond_to method_name
-      end
+    it "should pass the files path to the File equivilant" do
+      File.should_receive(:exist?).with(file.path)
+      file.exist?
     end
     it 'should be true if the file exists' do
       file.should exist

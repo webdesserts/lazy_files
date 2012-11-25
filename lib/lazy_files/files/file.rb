@@ -13,35 +13,34 @@ class Lazy::File
   def initialize(path, *args, &block)
     @path = File.expand_path path
     @io = nil
-    unless File.exists? @path
+    unless File.file? @path
       args = ['w'] if args.empty?
       if block_given?
-        File.open(@path, *args, &block)
+        @io = File.open(@path, *args, &block)
       else
-        File.open(@path, *args).close
+        @io = File.open(@path, *args) {}
       end
     end
   end
 
-  def basename(with_ext = true)
+  def basename(options={})
+    options = {
+      ext: true
+    }.merge(options)
     name = File.basename @path
-    if with_ext
+    if options[:ext]
       name
     else
       name[/.*(?=#{extname}\Z)/]
     end
   end
 
-  def name
-    basename(false)
+  def open(*args, &block)
+    @io = File.open(@path, *args, &block)
   end
 
   def to_s
     "#<LazyFile:#{basename}>"
-  end
-
-  def open(*args, &block)
-    @io = File.open(@path, *args, &block)
   end
 
 end
