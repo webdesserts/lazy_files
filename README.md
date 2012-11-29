@@ -120,11 +120,11 @@ Lazy.pwd   #=> /docs
 
 ### Command-Line Utils
 
-`wd`     - returns a `LazyDir` for the working directory
-`pwd`    - prints out the current dir (useful for debugging)
-`mkfile` - creates a new file and returns a `LazyFile`
-`mkdir`  - creates a new directory and returns a `LazyDir`
-`ls`     - returns an array of all items in the working directory in their Lazy form
+- `wd`     - returns a `LazyDir` for the working directory
+- `pwd`    - prints out the current dir (useful for debugging)
+- `mkfile` - creates a new file and returns a `LazyFile`
+- `mkdir`  - creates a new directory and returns a `LazyDir`
+- `ls`     - returns an array of all items in the working directory in their Lazy form
 
 
 ## Contributing
