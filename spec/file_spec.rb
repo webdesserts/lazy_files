@@ -1,7 +1,7 @@
 require 'spec_helper'
 require 'lazy_files/files/file'
 
-describe Lazy::File do
+describe Lazy::LazyFile do
   before(:all) { Dir.chdir TESTDIR }
   after(:each) { Spwn.clean TESTDIR }
   after(:all) do
@@ -18,7 +18,7 @@ describe Lazy::File do
   it { should respond_to :exists? }
   it { should respond_to :open }
   it 'should respond to all path based File methods' do
-    Lazy::File::PATHBASED_METHODS.each do |method_name|
+    Lazy::LazyFile::PATHBASED_METHODS.each do |method_name|
       should respond_to method_name
     end
   end
@@ -120,7 +120,7 @@ describe Lazy do
       Spwn.dir('hello') do
         Spwn.file('testfile.jpeg')
       end
-      Lazy.file('hello/testfile.jpeg').should be_an_instance_of Lazy::File
+      Lazy.file('hello/testfile.jpeg').should be_an_instance_of Lazy::LazyFile
     end
     it 'should open the file when a block is given' do
       Spwn.file('testfile.jpeg') do |file|

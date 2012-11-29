@@ -5,15 +5,14 @@
 # a method into a class method as this could cause
 # conflicts with future features.
 
-class Lazy::Dir
-  module ClassMethods
-    def dir(*args, &block)
-      Lazy::Dir.new(*args, &block)
-    end
-  end
-  extend ClassMethods
-end
-
 module Lazy
-  extend Lazy::Dir::ClassMethods
+  class LazyDir
+    module ClassMethods
+      def dir(*args, &block)
+        LazyDir.new(*args, &block)
+      end
+    end
+    extend ClassMethods
+  end
+  extend Lazy::LazyDir::ClassMethods
 end
