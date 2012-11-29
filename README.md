@@ -17,54 +17,115 @@ Or install it yourself as:
     $ gem install lazy_files
 
 ## Usage
-> This is currently out of date and needs some updating.
 
 ```ruby
-Lazy.pwd() #=> <Dir:/home/michael/code>
+Lazy.ls #=> [<LazyDir:lib>,<LazyDir:spec>,<LazyFile:README.md>, ... ]
+Lazy.ls.each do |entry|
+  puts entry.basename if entry.file? && entry.size > 0
+end
+
+# prints...
+#  Gemfile
+#  Gemfile.lock
+#  lazy_files.gemspec
+#  LICENSE
+#  Rakefile
+#  README.md
 ```
 
-```ruby
-Lazy.dir( './' ) #=> <Dir:/>
-Lazy.dir( '~/code' ) #=> <Dir:/home/michael/code>
-```
+### `LazyFile`
+
+`lazy_files` runs off of the idea of a `File` wrapper I call a `LazyFile`. To create a
+`LazyFile` simply call `Lazy.file`
 
 ```ruby
-Lazy.cd( '/' ) #=> <Dir:/>
-Lazy.cd( '/' ) do |dir|
-  # call stuff
+Lazy.file('readme.md') #=> <LazyFile:readme.md>
+```
+
+Unlike the `File` object, an IO stream is not opened when a `LazyFile` is created.
+This allows you to store references to your files without using up buffers or file
+descripters.
+
+```ruby
+file = Lazy.file('hello.txt')
+file.io                 #=> nil
+file.puts 'hello world'
+file.io                 #=> <File:hello.txt>
+file.io.closed?         #=> true
+```
+
+A `LazyFile` stores an absolute reference to your file, so you do not lose the
+file reference when you change directories
+
+```ruby
+lazy = Lazy.file('README.md')
+norm = File.open('README.md')
+
+# cd into tmp/
+Lazy.dir('tmp') do
+  lazy.path #=> /home/michael/code/lazy_files/README.md
+  norm.path #=> will raise an error
 end
 ```
 
+Just like with a `File` you can quickly open and close a file by passing it a block.
+
 ```ruby
-Lazy.ls() #=> [<Dir:src>,<Dir:bin>,<File:README.md>]
-Lazy.ls[0] #=> <Dir:src>
-Lazy.ls.each do |file|
-  puts file
+file = LazyFile.file('hello.txt') do |f|
+  f #=> <File:hello.txt>
+  f.print 'hello_world'
 end
-Lazy.ls( only: 'dirs' ) #=> [<Dir:src>,<Dir:bin>]
-Lazy.ls( ext: 'md' ) #=> ['README.md']
+file.io.closed? #=> true
+```
+
+`LazyFile`s are nothing but references. The file must already exist for you to
+reference it.
+
+```ruby
+Lazy.file('nofile.txt') #=> nil
+```
+
+if you want to create a file, call the `mkfile` method.
+
+```ruby
+Lazy.mkfile('nofile.txt') #=> <LazyFile:nofile.txt>
+```
+
+### `LazyDir`
+
+A `LazyDir` works very similar to a `LazyFile`
+
+```ruby
+Lazy.dir('docs')     #=> <LazyDir:docs>
+Lazy.mkdir('newdir') #=> <LazyDir:newdir>
 ```
 
 ```ruby
-Lazy.file( 'index.html' ).ext() #=> 'html'
-Lazy.file( 'logo.png' ).ext?('html') #=> false
+# You can cd into a directory by passing a block.
+Lazy.pwd   #=> /
+Lazy.dir('docs') do
+  Lazy.pwd #=> /docs
+end
+
+# or use the `cd` method
+dir = Lazy.dir('docs')
+dir.cd do
+  Lazy.pwd #=> /docs
+end
+
+Lazy.pwd   #=> /
+dir.cd
+Lazy.pwd   #=> /docs
 ```
 
-```ruby
-Lazy.count() #=> 21
-Lazy.count( ext: 'html' ) #=> 21
-```
+### Command-Line Utils
 
-```ruby
-Lazy.collect( ext: 'js' ) #=> [<File:app.js>]
-Lazy.collect( 'assets/js', ext: 'js' ) #=> [<File:main.js>]
-Lazy.collect( 'assets/js', ext: 'js', recursive: true ) #=> [<File:main.js>,<File:bootstrap.js>,<File:jquery.js>]
-```
+`wd`     - returns a `LazyDir` for the working directory
+`pwd`    - prints out the current dir (useful for debugging)
+`mkfile` - creates a new file and returns a `LazyFile`
+`mkdir`  - creates a new directory and returns a `LazyDir`
+`ls`     - returns an array of all items in the working directory in their Lazy form
 
-```ruby
-Lazy.recursively { |file,cd| ... }
-Lazy.recursively( limit: 3 ) { |file,cd| ... }
-```
 
 ## Contributing
 
