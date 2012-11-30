@@ -1,6 +1,6 @@
 # LazyFiles
 
-TODO: Write a gem description
+A Library to make your File-Handling in Ruby a little less painful.
 
 ## Installation
 
