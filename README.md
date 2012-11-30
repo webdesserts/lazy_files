@@ -33,16 +33,16 @@ end
 #  README.md
 ```
 
-### `LazyFile`
+### Lazy::File
 
-`lazy_files` runs off of the idea of a `File` wrapper I call a `LazyFile`. To create a
-`LazyFile` simply call `Lazy.file`
+`LazyFiles` runs off of the idea of a `File` wrapper I call a `Lazy::File`. To create a
+`Lazy::File` simply call `Lazy.file`
 
 ```ruby
 Lazy.file('readme.md') #=> <LazyFile:readme.md>
 ```
 
-Unlike the `File` object, an IO stream is not opened when a `LazyFile` is created.
+Unlike the `File` object, an IO stream is not opened when a `Lazy::File` is created.
 This allows you to store references to your files without using up buffers or file
 descripters.
 
@@ -54,7 +54,7 @@ file.io                 #=> <File:hello.txt>
 file.io.closed?         #=> true
 ```
 
-A `LazyFile` stores an absolute reference to your file, so you do not lose the
+A `Lazy::File` stores an absolute reference to your file, so you do not lose the
 file reference when you change directories
 
 ```ruby
@@ -78,7 +78,7 @@ end
 file.io.closed? #=> true
 ```
 
-`LazyFile`s are nothing but references. The file must already exist for you to
+A `Lazy::File` is nothing but a reference. The file must already exist for you to
 reference it.
 
 ```ruby
@@ -91,9 +91,9 @@ if you want to create a file, call the `mkfile` method.
 Lazy.mkfile('nofile.txt') #=> <LazyFile:nofile.txt>
 ```
 
-### `LazyDir`
+### Lazy::Dir
 
-A `LazyDir` works very similar to a `LazyFile`
+A `Lazy::Dir` works very similar to a `Lazy::File`
 
 ```ruby
 Lazy.dir('docs')     #=> <LazyDir:docs>
@@ -120,10 +120,10 @@ Lazy.pwd   #=> /docs
 
 ### Command-Line Utils
 
-- `wd`     - returns a `LazyDir` for the working directory
+- `wd`     - returns a `Lazy::Dir` for the working directory
 - `pwd`    - prints out the current dir (useful for debugging)
-- `mkfile` - creates a new file and returns a `LazyFile`
-- `mkdir`  - creates a new directory and returns a `LazyDir`
+- `mkfile` - creates a new file and returns a `Lazy::File`
+- `mkdir`  - creates a new directory and returns a `Lazy::Dir`
 - `ls`     - returns an array of all items in the working directory in their Lazy form
 
 

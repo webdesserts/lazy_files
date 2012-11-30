@@ -2,25 +2,27 @@ require 'lazy_files/files/file_mods'
 require 'lazy_files/files/constants'
 
 module Lazy
-  class LazyFile
+  class File
     attr_reader :path, :io
 
     PATHBASED_METHODS.each do |method_name|
       define_method(method_name) do
-        File.send(method_name, @path)
+        ::File.send(method_name, @path)
       end
     end
 
     def initialize(path, *args, &block)
-      @path = File.expand_path path
+      @path = ::File.expand_path path
       @io = nil
-      unless File.file? @path
-        args = ['w'] if args.empty?
+      args[0] = 'w+' if args.empty?
+      if ::File.file? @path
         if block_given?
-          @io = File.open(@path, *args, &block)
+          @io = ::File.open(@path, *args, &block)
         else
-          @io = File.open(@path, *args) {}
+          @io = ::File.open(@path, *args) {}
         end
+      else
+        raise Errno::ENOENT
       end
     end
 
@@ -28,7 +30,7 @@ module Lazy
       options = {
         ext: true
       }.merge(options)
-      name = File.basename @path
+      name = ::File.basename @path
       if options[:ext]
         name
       else
@@ -37,7 +39,7 @@ module Lazy
     end
 
     def open(*args, &block)
-      @io = File.open(@path, *args, &block)
+      @io = ::File.open(@path, *args, &block)
     end
 
     def to_s

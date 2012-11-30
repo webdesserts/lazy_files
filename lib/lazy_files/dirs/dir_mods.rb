@@ -6,13 +6,13 @@
 # conflicts with future features.
 
 module Lazy
-  class LazyDir
+  class Dir
     module ClassMethods
       def dir(*args, &block)
-        LazyDir.new(*args, &block)
+        Lazy::Dir.new(*args, &block)
       end
     end
     extend ClassMethods
   end
-  extend Lazy::LazyDir::ClassMethods
+  extend Lazy::Dir::ClassMethods
 end

@@ -1,5 +1,5 @@
 module Lazy
-  class LazyFile
+  class File
     # This is a list of most of the methods in the Ruby File class that
     # have a single parameter and accept a path name. This is here
     # to allow me to metaprogram the methods into the Lazy::File

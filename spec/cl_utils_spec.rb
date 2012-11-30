@@ -7,7 +7,7 @@ describe Lazy do
   it { should respond_to :pwd }
   describe "#pwd" do
     subject(:pwd) { Lazy.pwd }
-    it { should be_an_instance_of Lazy::LazyDir }
+    it { should be_an_instance_of Lazy::Dir }
     it "should be the current directory" do
       pwd.path.should == Dir.pwd
     end

@@ -1,7 +1,7 @@
 require 'spec_helper'
 require 'lazy_files/dirs/dir'
 
-describe Lazy::LazyDir do
+describe Lazy::Dir do
   before(:all) { Dir.chdir TESTDIR }
   after(:each) { Spwn.clean TESTDIR }
   after(:all) do
@@ -14,7 +14,7 @@ describe Lazy::LazyDir do
   its(:path) { should == File.join(TESTDIR, 'hello') }
 
   it 'should respond to all path based Dir methods' do
-    Lazy::LazyDir::PATHBASED_METHODS.each do |method_name|
+    Lazy::Dir::PATHBASED_METHODS.each do |method_name|
       should respond_to method_name
     end
   end

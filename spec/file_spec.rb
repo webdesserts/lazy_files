@@ -1,14 +1,14 @@
 require 'spec_helper'
 require 'lazy_files/files/file'
 
-describe Lazy::LazyFile do
+describe Lazy::File do
   before(:all) { Dir.chdir TESTDIR }
   after(:each) { Spwn.clean TESTDIR }
   after(:all) do
     Dir.chdir ROOT
     Spwn.clean TESTDIR
   end
-  subject(:file) { Lazy.file('hello.txt') }
+  subject(:file) { Lazy.mkfile('hello.txt') }
 
   its(:io) { should be_nil }
   its(:path) { should == File.join(TESTDIR, 'hello.txt')}
@@ -18,7 +18,7 @@ describe Lazy::LazyFile do
   it { should respond_to :exists? }
   it { should respond_to :open }
   it 'should respond to all path based File methods' do
-    Lazy::LazyFile::PATHBASED_METHODS.each do |method_name|
+    Lazy::File::PATHBASED_METHODS.each do |method_name|
       should respond_to method_name
     end
   end
@@ -26,17 +26,22 @@ describe Lazy::LazyFile do
   context '#new' do
     context "with a block passed" do
       it "should open and immediately close a file" do
+        Spwn.file('hello', ext:'txt')
         io = nil
-        Lazy.file('hello.txt') do |f|
+        Lazy::File.new('hello.txt') do |f|
           io = f
         end
         io.should be_closed
       end
       it "should allow access to the file" do
-        Lazy.file('hello.txt') do |f|
+        Spwn.file('hello', ext:'txt')
+        Lazy::File.new('hello.txt') do |f|
           f.print "hello world"
         end
         `cat hello.txt`.should == "hello world"
+      end
+      it "should raise an error if the file doesn't exist" do
+        expect { Lazy::File.new('hello.txt') }.to raise_error Errno::ENOENT
       end
     end
   end
@@ -50,13 +55,13 @@ describe Lazy::LazyFile do
         file.basename(ext: false).should == 'hello'
       end
       it 'should return the files name' do
-        Lazy.file('hello.jpg').basename(ext: false).should == 'hello'
+        Lazy.mkfile('hello.jpg').basename(ext: false).should == 'hello'
       end
       it 'should work with dotfiles' do
-        Lazy.file('.gitignore').basename(ext: false).should == '.gitignore'
+        Lazy.mkfile('.gitignore').basename(ext: false).should == '.gitignore'
       end
       it 'should work with multiple extensions' do
-        Lazy.file('main.js.coffee').basename(ext: false).should == 'main.js'
+        Lazy.mkfile('main.js.coffee').basename(ext: false).should == 'main.js'
       end
     end
   end
@@ -76,7 +81,7 @@ describe Lazy::LazyFile do
   end
 
   context '#open' do
-    subject(:file) { Lazy.file('hello.txt') }
+    subject(:file) { Lazy.mkfile('hello.txt') }
     it 'should allow you to open an access a file' do
       file.open('w') do |f|
         f.puts 'hello world'
@@ -104,23 +109,21 @@ describe Lazy do
       Lazy.basename('hello/testfile.jpeg').should == 'testfile.jpeg'
     end
     it 'should accept a Lazy::File' do
-      Spwn.file('testfile.jpeg')
-      file = Lazy.file('testfile.jpeg')
+      file = Lazy.mkfile('testfile.jpeg')
       Lazy.basename(file)
     end
   end
 
   context '::file' do
     it { should respond_to :file}
-    it 'should create a file if it does not exist' do
-      Lazy.file('testfile.jpeg')
-      File.exist?('testfile.jpeg').should be_true
+    it 'should return nil if the file does not exist' do
+      Lazy.file('testfile.jpeg').should be_nil
     end
-    it 'should return the file' do
+    it 'should return the file if it does exist' do
       Spwn.dir('hello') do
-        Spwn.file('testfile.jpeg')
+        Spwn.file('testfile',ext:'jpeg')
       end
-      Lazy.file('hello/testfile.jpeg').should be_an_instance_of Lazy::LazyFile
+      Lazy.file('hello/testfile.jpeg').should be_an_instance_of Lazy::File
     end
     it 'should open the file when a block is given' do
       Spwn.file('testfile.jpeg') do |file|

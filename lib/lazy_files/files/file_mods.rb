@@ -6,18 +6,26 @@
 # conflicts with future features.
 
 module Lazy
-  class LazyFile
+  class File
     module ClassMethods
       def basename(file)
-        file = file.path if file.is_a? LazyFile
-        File.basename file
+        file = file.path if file.is_a? Lazy::File
+        ::File.basename file
       end
 
-      def file(*args, &block)
-        LazyFile.new(*args, &block)
+      def file(path, *args, &block)
+        File.new(path, *args, &block)
+      rescue Errno::ENOENT
+        return nil
+      end
+
+      def mkfile(filename, *args, &block)
+        args[0] = 'w' if args.empty?
+        ::File.open(filename, *args, &block)
+        Lazy.file(filename)
       end
     end
     extend ClassMethods
   end
-  extend Lazy::LazyFile::ClassMethods
+  extend Lazy::File::ClassMethods
 end
