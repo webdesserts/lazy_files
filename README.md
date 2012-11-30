@@ -35,7 +35,7 @@ end
 
 ### Lazy::File
 
-`LazyFiles` runs off of the idea of a `File` wrapper I call a `Lazy::File`. To create a
+LazyFiles runs off of the idea of a `File` wrapper I call a `Lazy::File`. To create a
 `Lazy::File` simply call `Lazy.file`
 
 ```ruby
@@ -68,7 +68,8 @@ Lazy.dir('tmp') do
 end
 ```
 
-Just like with a `File` you can quickly open and close a file by passing it a block.
+Just like with a `File` you can quickly open and close a file by passing the `Lazy.file`
+method a block.
 
 ```ruby
 file = LazyFile.file('hello.txt') do |f|
