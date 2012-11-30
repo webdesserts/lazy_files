@@ -24,6 +24,13 @@ describe Lazy::File do
   end
 
   context '#new' do
+    context "without a block" do
+      before(:each) {
+        Spwn.file('hello', ext: 'txt')
+      }
+      subject(:file) { Lazy::File.new('hello.txt') }
+      its(:io) { should be_nil }
+    end
     context "with a block passed" do
       it "should open and immediately close a file" do
         Spwn.file('hello', ext:'txt')

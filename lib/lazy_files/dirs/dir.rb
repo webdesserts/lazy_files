@@ -13,10 +13,7 @@ module Lazy
 
     def initialize(path)
       @path = ::File.expand_path path
-      unless ::File.directory? @path
-        ::Dir.mkdir(::File.basename(@path))
-      end
-      @io = ::Dir.open(@path) {}
+      @io = nil
     end
 
     def basename

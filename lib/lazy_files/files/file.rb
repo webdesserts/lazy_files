@@ -11,16 +11,11 @@ module Lazy
       end
     end
 
-    def initialize(path, *args, &block)
+    def initialize(path, &block)
       @path = ::File.expand_path path
       @io = nil
-      args[0] = 'w+' if args.empty?
       if ::File.file? @path
-        if block_given?
-          @io = ::File.open(@path, *args, &block)
-        else
-          @io = ::File.open(@path, *args) {}
-        end
+        @io = ::File.open(@path, 'w+', &block) if block_given?
       else
         raise Errno::ENOENT
       end
