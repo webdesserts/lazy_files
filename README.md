@@ -1,6 +1,6 @@
 # LazyFiles
 
-A Library to make your File-Handling in Ruby a little less painful.
+A Library to make File-Handling in Ruby a little less painful.
 
 ## Installation
 
@@ -42,18 +42,6 @@ LazyFiles runs off of the idea of a `File` wrapper I call a `Lazy::File`. To cre
 Lazy.file('readme.md') #=> <LazyFile:readme.md>
 ```
 
-Unlike the `File` object, an IO stream is not opened when a `Lazy::File` is created.
-This allows you to store references to your files without using up buffers or file
-descripters.
-
-```ruby
-file = Lazy.file('hello.txt')
-file.io                 #=> nil
-file.puts 'hello world'
-file.io                 #=> <File:hello.txt>
-file.io.closed?         #=> true
-```
-
 A `Lazy::File` stores an absolute reference to your file, so you do not lose the
 file reference when you change directories
 
@@ -68,21 +56,47 @@ Lazy.dir('tmp') do
 end
 ```
 
-Just like with a `File` you can quickly open and close a file by passing the `Lazy.file`
-method a block.
+Unlike the `File` object, an IOStream is not opened when a `Lazy::File` is created.
+This allows you to store references to your files without using up buffers or file
+descripters.
+
+```ruby
+file = Lazy.file('hello.txt')
+file.io                 #=> nil
+file.puts 'hello world'
+file.io                 #=> <File:hello.txt>
+file.close              #=> true
+file.io                 #=> nil
+```
+
+**IMPORTANT** if you have never worked with IOs before there is an important concept
+to take hold of. When you open an IOStream you are sectioning off a buffer. This means
+that **any IO left open with memory and file descriptors!!!** This is why its always
+good practice to **close your IOs** after you're done with them.
+
+With a `Lazy::File` you can close it with `#close`.
+
+```ruby
+file = Lazy.file('hello.txt')
+file.puts 'stuff...'
+file.close #=> will close the io and reset file#io to nil
+```
+
+Just like with a `File` you can also quickly open and close a file by passing `Lazy#file`
+a block.
 
 ```ruby
 file = LazyFile.file('hello.txt') do |f|
-  f #=> <File:hello.txt>
   f.print 'hello_world'
 end
-file.io.closed? #=> true
+file.closed? #=> true
 ```
 
 A `Lazy::File` is nothing but a reference. The file must already exist for you to
 reference it.
 
 ```ruby
+Lazy.ls #=> []
 Lazy.file('nofile.txt') #=> nil
 ```
 

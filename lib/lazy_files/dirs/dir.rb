@@ -25,7 +25,7 @@ module Lazy
     end
 
     def to_s
-      "#<Lazy::Dir:#{basename}"
+      "#<LazyDir:#{basename}"
     end
   end
 end
