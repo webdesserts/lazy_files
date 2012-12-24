@@ -1,15 +1,18 @@
 require 'spec_helper'
 require 'lazy_files/dirs/dir'
-require 'lazy_files/cl_utils/cl_utils'
+require 'lazy_files/utils/utils'
+
 
 describe Lazy do
-  subject { Lazy }
+  init()
   it { should respond_to :pwd }
-  describe "#pwd" do
-    subject(:pwd) { Lazy.pwd }
+  it { should respond_to :wd}
+  describe "#wd" do
+    subject(:wd) { Lazy.wd }
     it { should be_an_instance_of Lazy::Dir }
     it "should be the current directory" do
-      pwd.path.should == Dir.pwd
+      wd.path.should == Dir.pwd
     end
   end
 end
+

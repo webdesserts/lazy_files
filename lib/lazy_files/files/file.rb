@@ -1,4 +1,4 @@
-require 'lazy_files/files/file_mods'
+require 'lazy_files/files/class_methods'
 require 'lazy_files/files/constants'
 
 module Lazy

@@ -2,12 +2,7 @@ require 'spec_helper'
 require 'lazy_files/files/file'
 
 describe Lazy::File do
-  before(:all) { Dir.chdir TESTDIR }
-  after(:each) { Spwn.clean TESTDIR }
-  after(:all) do
-    Dir.chdir ROOT
-    Spwn.clean TESTDIR
-  end
+  init
   subject(:file) { Lazy.mkfile('hello.txt') }
 
   its(:stream) { should be_nil }
@@ -178,9 +173,7 @@ describe Lazy::File do
 end
 
 describe Lazy do
-  before(:all) { Dir.chdir TESTDIR }
-  after(:each) { Spwn.clean TESTDIR }
-  after(:all) { Dir.chdir ROOT}
+  init
   context "::basename" do
     it { should respond_to :basename }
     it 'should accept a path' do

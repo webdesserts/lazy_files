@@ -2,15 +2,7 @@ require 'spec_helper'
 require 'lazy_files/dirs/dir'
 
 describe Lazy::Dir do
-  before(:all) { Dir.chdir TESTDIR }
-  after(:each) do
-    Dir.chdir TESTDIR
-    Spwn.clean TESTDIR
-  end
-  after(:all) do
-    Spwn.clean TESTDIR
-    Dir.chdir ROOT
-  end
+  init
   subject(:dir) { Lazy.mkdir('hello') }
 
   its(:stream) { should be_nil }
@@ -91,15 +83,7 @@ describe Lazy::Dir do
 end
 
 describe Lazy do
-  before(:all) { Dir.chdir TESTDIR }
-  after(:each) do
-    Dir.chdir TESTDIR
-    Spwn.clean TESTDIR
-  end
-  after(:all) do
-    Spwn.clean TESTDIR
-    Dir.chdir ROOT
-  end
+  init
   let!(:dir) { Lazy.mkdir('hello') }
   describe '::mkdir' do
     it "should return a Lazy::Dir" do

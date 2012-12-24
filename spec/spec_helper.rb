@@ -21,3 +21,12 @@ RSpec.configure do |config|
   #     --seed 1234
   config.order = 'random'
 end
+
+def init
+  before(:all) { Dir.chdir TESTDIR }
+  after(:each) do
+    Dir.chdir TESTDIR
+    Spwn.clean TESTDIR
+  end
+  after(:all) { Dir.chdir ROOT }
+end
