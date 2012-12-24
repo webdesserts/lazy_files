@@ -3,7 +3,7 @@ require 'lazy_files/files/constants'
 
 module Lazy
   class File
-    attr_reader :path, :io
+    attr_reader :path, :stream
 
     PATHBASED_METHODS.each do |method_name|
       define_method(method_name) do
@@ -13,10 +13,12 @@ module Lazy
 
     def initialize(path, *args, &block)
       @path = ::File.expand_path path
-      @io = nil
+      @stream = nil
       if ::File.file? @path
-        if block_given? || !args.empty?
+        if !args.empty?
           open(*args, &block)
+        else
+          execute_and_close(&block) if block_given?
         end
       else
         raise Errno::ENOENT
@@ -37,14 +39,9 @@ module Lazy
     end
 
     def open(*args, &block)
-      # read-write mode if no mode specified
-      # args[0] = 'a+' if args.empty?
-      if block_given?
-        execute_and_close(&block)
-      else
-        new_io(*args)
-      end
-      self
+      new_stream(*args) unless args.empty? && block_given?
+      execute_and_close(&block) if block_given?
+      @stream
     end
 
     def reopen(*args, &block)
@@ -53,29 +50,25 @@ module Lazy
     end
 
     def print(*args)
-      default_mode('w')
-      @io.print(*args)
+      ensure_open('w')
+      @stream.print(*args)
     end
 
     def puts(*args)
-      default_mode('w')
-      @io.puts(*args)
+      ensure_open('w')
+      @stream.puts(*args)
     end
 
     def read(*args)
-      default_mode('r')
-      @io.read(*args)
-    end
-
-    def to_s
-      "#<LazyFile:#{basename}>"
+      ensure_open('r')
+      @stream.read(*args)
     end
 
     def close
-      if @io.closed?
+      if closed?
         false
       else
-        @io = @io.close
+        @stream = @stream.close
         true
       end
     end
@@ -86,20 +79,29 @@ module Lazy
     end
 
     def closed?
-      @io.nil? || @io.closed?
+      @stream.nil? || @stream.closed?
+    end
+
+    def open?
+      @stream.is_a?(::File) && !@stream.closed?
+    end
+
+    def to_s
+      "#<LazyFile:#{basename}>"
     end
 
     private
-    def default_mode(*args)
-      new_io(*args) if closed?
+    def ensure_open(*args)
+      new_stream(*args) if closed?
     end
 
     def execute_and_close(&block)
       yield self
       close
     end
-    def new_io(*args)
-      @io = ::File.new(@path, *args)
+
+    def new_stream(*args)
+      @stream = ::File.new(@path, *args)
     end
   end
 end

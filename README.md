@@ -1,6 +1,6 @@
-# LazyFiles
+# LazyFiles(v0.0.4)
 
-A Library to make File-Handling in Ruby a little less painful.
+A Library to make File-Handling in Ruby simple(r).
 
 ## Installation
 
@@ -23,14 +23,17 @@ Lazy.ls #=> [<LazyDir:lib>,<LazyDir:spec>,<LazyFile:README.md>, ... ]
 Lazy.ls.each do |entry|
   puts entry.basename if entry.file? && entry.size > 0
 end
+```
 
-# prints...
-#  Gemfile
-#  Gemfile.lock
-#  lazy_files.gemspec
-#  LICENSE
-#  Rakefile
-#  README.md
+prints...
+
+```
+Gemfile
+Gemfile.lock
+lazy_files.gemspec
+LICENSE
+Rakefile
+README.md
 ```
 
 ### Lazy::File
@@ -62,24 +65,25 @@ descripters.
 
 ```ruby
 file = Lazy.file('hello.txt')
-file.io                 #=> nil
+file.stream             #=> nil
 file.puts 'hello world'
-file.io                 #=> <File:hello.txt>
+file.stream             #=> <File:hello.txt>
 file.close              #=> true
-file.io                 #=> nil
+file.stream             #=> nil
 ```
 
-**IMPORTANT** if you have never worked with IOs before there is an important concept
+**IMPORTANT** if you have never worked with an IOStream before there is an important concept
 to take hold of. When you open an IOStream you are sectioning off a buffer. This means
-that **any IO left open with memory and file descriptors!!!** This is why its always
-good practice to **close your IOs** after you're done with them.
+that **any stream left open will leak memory and file descriptors!** Even though Ruby eventually
+closes the stream through garbage collection, its always good practice to **close your streams**
+after you're done with them.
 
 With a `Lazy::File` you can close it with `#close`.
 
 ```ruby
 file = Lazy.file('hello.txt')
 file.puts 'stuff...'
-file.close #=> will close the io and reset file#io to nil
+file.close #=> will close the stream and reset file#stream to nil
 ```
 
 Just like with a `File` you can also quickly open and close a file by passing `Lazy#file`
@@ -104,6 +108,7 @@ if you want to create a file, call the `mkfile` method.
 
 ```ruby
 Lazy.mkfile('nofile.txt') #=> <LazyFile:nofile.txt>
+Lazy.ls #=> [<LazyDir:nofile.txt>]
 ```
 
 ### Lazy::Dir
@@ -115,16 +120,21 @@ Lazy.dir('docs')     #=> <LazyDir:docs>
 Lazy.mkdir('newdir') #=> <LazyDir:newdir>
 ```
 
+You can cd into a directory by passing a block.
+
 ```ruby
-# You can cd into a directory by passing a block.
 Lazy.pwd   #=> /
 Lazy.dir('docs') do
   Lazy.pwd #=> /docs
 end
+```
 
-# or use the `cd` method
+or use the `cd` method
+
+```ruby
 dir = Lazy.dir('docs')
-dir.cd do
+dir.cd do |d|
+  d #=> <LazyDir:/docs>
   Lazy.pwd #=> /docs
 end
 
@@ -133,13 +143,31 @@ dir.cd
 Lazy.pwd   #=> /docs
 ```
 
+You can also use `Lazy::cd`.
+
+```ruby
+Lazy.cd('docs') do
+  Lazy.pwd #=> /docs
+end
+```
+
+If you for some odd reason you want to open a stream to your `LazyDir`,
+you can do it the same way you would in a normal `Dir`
+
+```ruby
+dir = dir('docs')
+dir.open
+dir.tell
+dir.read
+dir.close
+```
+
 ### Command-Line Utils
 
-- `wd`     - returns a `Lazy::Dir` for the working directory
-- `pwd`    - prints out the current dir (useful for debugging)
-- `mkfile` - creates a new file and returns a `Lazy::File`
-- `mkdir`  - creates a new directory and returns a `Lazy::Dir`
-- `ls`     - returns an array of all items in the working directory in their Lazy form
+- `wd`/`pwd` - returns a `Lazy::Dir` for the working directory
+- `mkfile`   - creates a new file and returns a `Lazy::File`
+- `mkdir`    - creates a new directory and returns a `Lazy::Dir`
+- `ls`       - returns an array of all items in the working directory in their Lazy form
 
 
 ## Contributing

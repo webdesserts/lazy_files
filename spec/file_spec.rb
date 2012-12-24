@@ -10,7 +10,7 @@ describe Lazy::File do
   end
   subject(:file) { Lazy.mkfile('hello.txt') }
 
-  its(:io) { should be_nil }
+  its(:stream) { should be_nil }
   its(:path) { should == File.join(TESTDIR, 'hello.txt')}
 
   it { should respond_to :basename }
@@ -26,23 +26,40 @@ describe Lazy::File do
   describe '#new' do
     context 'without a block' do
       before(:each) { Spwn.file('hello', ext: 'txt') }
-      context 'and no args' do
+      context 'or a mode' do
         subject(:file) { Lazy::File.new('hello.txt') }
-        its(:io) { should be_nil }
+        it { should be_closed }
       end
-      context 'and args' do
+      context 'but with a mode' do
         subject(:file) { Lazy::File.new('hello.txt','r') }
-        its(:io) { should_not be_nil }
+        it { should be_open }
       end
     end
-    context 'with a block passed' do
-      before(:each) { Spwn.file('hello', ext:'txt') }
-      subject(:file) do
-        Lazy::File.new('hello.txt'){|f| f.print 'hello world'}
+    context 'with a block' do
+      before(:each) { Lazy.mkfile('hello.txt') }
+      it 'should close the stream after execution' do
+        file = Lazy::File.new('hello.txt')
+        file.should be_closed
       end
-      it { should be_closed }
-      it 'should allow access to the file' do
-        file.reopen('r').read.should == "hello world"
+      context 'and a mode' do
+        it 'should open the stream for the duration of the block' do
+          Lazy::File.new('hello.txt','w') do |f|
+            f.should be_open
+          end
+        end
+      end
+      context 'and no mode' do
+        it 'should not open the stream' do
+          Lazy::File.new('hello.txt') do |f|
+            f.should be_closed
+          end
+        end
+        it 'should close any streams opened by methods called within the block' do
+          file = Lazy::File.new('hello.txt') do |f|
+            f.puts 'hello world'
+          end
+          file.closed?
+        end
       end
     end
     it "should raise an error if the file doesn't exist" do
@@ -88,25 +105,24 @@ describe Lazy::File do
     subject(:file) { Lazy.mkfile('hello.txt') }
     context "with a block" do
       it "should close the file immediately after" do
-        file()
-        Lazy.file('hello.txt'){ |f| f.puts }.should be_closed
+        file.open('w'){}
+        file.should be_closed
+      end
+      it 'should open the stream for the duration of the block' do
+        file.open('w') do |f|
+          f.should be_open
+        end
       end
     end
     context "without a block" do
-    end
-    it 'should allow you to open an access a file' do
-      file.open('w') do |f|
-        f.puts 'hello world'
+      it "should set an stream value if a block isn't given" do
+        file.open('w')
+        file.stream.should be_an_instance_of File
+        file.stream.should_not be_closed
       end
-      `cat hello.txt`.strip.should == 'hello world'
-    end
-    it "should set an io value if a block isn't given" do
-      file.open('w')
-      file.io.should be_an_instance_of File
-      file.io.should_not be_closed
-    end
-    it 'should return a File object' do
-      file.open('w').should be_an_instance_of Lazy::File
+      it 'should return a File object' do
+        file.open('w').should be_an_instance_of File
+      end
     end
   end
 
@@ -136,25 +152,25 @@ describe Lazy::File do
     end
   end
 
-  describe '#default_mode' do
-    context 'with an open io' do
+  describe '#ensure_open' do
+    context 'with an open stream' do
       let(:file) { Lazy.mkfile('testfile.txt') }
       before(:each) { file.open }
-      it "should not change the @io" do
-        io = file.io
-        file.send(:default_mode)
-        file.io.should be io
+      it "should not change the @stream" do
+        stream = file.stream
+        file.send(:ensure_open)
+        file.stream.should be stream
       end
     end
-    context 'with a nil @io' do
+    context 'with a nil @stream' do
       subject(:file){ file = Lazy.mkfile('test.txt') }
-      it "should open a new io" do
+      it "should open a new stream" do
         File.should_receive(:new)
-        file.send(:default_mode) {}
+        file.send(:ensure_open) {}
       end
-      it "should set the @io to the used File" do
-        expect { file.send(:default_mode) {} }.to change{
-          file.io
+      it "should set the @stream to the used File" do
+        expect { file.send(:ensure_open) {} }.to change{
+          file.stream
         }.from( nil ).to( File )
       end
     end
