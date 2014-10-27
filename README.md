@@ -1,4 +1,5 @@
 # LazyFiles(v0.0.4)
+**warning**: This software was last left in an alpha stage. Some of the APIs listed below are yet to be implemented, or were lost due to me barely knowing how to use git at the time. Use at your own caution.
 
 A Library to make File-Handling in Ruby simple(r).
 
